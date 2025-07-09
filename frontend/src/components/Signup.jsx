@@ -1,6 +1,10 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Login from "./Login"
 import { useForm } from "react-hook-form"
+import axios from 'axios'
+import toast from 'react-hot-toast';
+
+// http://localhost:4001/user/signup
 
 const Signup = () => {
  const {
@@ -9,7 +13,35 @@ const Signup = () => {
     formState: { errors },
   } = useForm()
 
-  const onSubmit = (data) => console.log(data)
+  const navigate = useNavigate()
+
+  const onSubmit = async (data) => {
+    const userInfo = {
+        fullname: data.fullname,
+        email: data.email,
+        password:data.password
+    }
+    await axios.post("http://localhost:4001/user/signup",userInfo)
+    .then((res)=>{
+
+        if(res.data)
+        {
+            toast.success(res.data.message)
+            localStorage.setItem("User",JSON.stringify(res.data.user))
+            setTimeout(()=>{
+                navigate('/')
+                window.location.reload()
+                },1000)
+        }
+
+    })
+    .catch((error)=>{
+        if(error.response)
+        {
+            toast.error("Error : " + error.response.data.message)
+        }
+    })
+  }
   return (
     <>
     <div className='flex h-screen items-center justify-center'>
@@ -28,10 +60,10 @@ const Signup = () => {
                 <div className='mt-4'>
                     <label>Email</label>
                     <br />
-                    <input type="email" name="username" id="username" placeholder='Enter your email' className='w-full my-1 p-2 outline-none border-2'
-                    {...register("username", { required: true })} 
+                    <input type="email" name="email"  placeholder='Enter your email' className='w-full my-1 p-2 outline-none border-2'
+                    {...register("email", { required: true })} 
                     />
-                    {errors.username && <span className="text-red-600">* This field is required</span>}
+                    {errors.email && <span className="text-red-600">* This field is required</span>}
                 </div>
                 <div className='mt-2'>
                     <label>Password</label>

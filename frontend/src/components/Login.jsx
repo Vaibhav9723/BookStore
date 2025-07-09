@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useForm } from "react-hook-form"
+import axios from 'axios'
+import toast from 'react-hot-toast'
 
 
 const Login = () => {
@@ -9,14 +11,39 @@ const Login = () => {
     formState: { errors },
   } = useForm()
 
-  const onSubmit = (data) => console.log(data)
+  const onSubmit = async (data) => {
+    const userInfo = {
+        email : data.email,
+        password : data.pass
+    }
+
+    await axios.post("http://localhost:4001/user/login",userInfo)
+    .then((result) => {
+        if(result.data)
+        {
+        toast.success(result.data.message)
+        // alert("Loggedin Successfully");
+        document.getElementById("my_modal_3").close();
+          setTimeout(() => {
+            window.location.reload();
+            localStorage.setItem("User", JSON.stringify(result.data.user));
+          }, 1000);
+        }
+        // localStorage.setItem("User",JSON.stringify(result.data.user))
+    }).catch((err) => {
+        if(err.response)
+        {
+            toast.error("Error : " + err.response.data.message)
+        }
+    });
+  }
   return (
     <>
     <div>
         <dialog id="my_modal_3" className="modal">
             <div className="modal-box">
                 <form method="dialog" onSubmit={handleSubmit(onSubmit)}> 
-                <Link to={'/'} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</Link>
+                <span onClick={()=>document.getElementById("my_modal_3").close()} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</span>
                 
                 <h3 className="font-bold text-lg">Login</h3>
                 <div className='mt-4'>
